@@ -1,7 +1,7 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, FlatList, Image } from 'react-native';
-import SearchBar from './SearchBar';
+import SearchBar from '../../components/SearchBar';
 
 // Dummy data for images
 const dummyImages = [
@@ -14,7 +14,7 @@ const dummyImages = [
   { id: 7, uri: 'https://th.bing.com/th/id/R.4f018837ae222a5a01b7e1f7d9b24470?rik=Nj3Hfcf6ZsSnig&pid=ImgRaw&r=0' },
 ];
 
-const HomeScreen = () => {
+export default function HomeScreen() {
   const renderItem = ({ item }) => (
     <View style={styles.imageContainer}>
       <Image style={styles.image} source={{ uri: item.uri }} />
@@ -72,5 +72,3 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
-
-export default HomeScreen;
