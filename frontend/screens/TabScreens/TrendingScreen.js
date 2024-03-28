@@ -26,7 +26,7 @@ export default function TrendingScreen() {
         <SearchBar />
       </View>
       <View style={styles.likedContainer}>
-        <Text>Most Liked{'\n'}</Text>
+        <Text>Most Liked ❤️{'\n'}</Text>
         <FlatList
           data={dummyImages.slice(0, 3)}
           renderItem={renderItem}
@@ -35,7 +35,7 @@ export default function TrendingScreen() {
         />
       </View>
       <View style={styles.trendingContainer}>
-        <Text>Most Liked{'\n'}</Text>
+        <Text>Trending 🔥{'\n'}</Text>
         <FlatList
           data={dummyImages.slice(3, -2)}
           renderItem={renderItem}
