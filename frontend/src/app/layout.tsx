@@ -4,8 +4,14 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { initializeApp, FirebaseApp } from "firebase/app";
-import { createContext } from "react";
-// import { FirebaseApp, getAuth, onAuthStateChanged } from 'firebase/auth';
+import { createContext, useEffect, useState } from "react";
+import { getAuth, signOut } from "firebase/auth";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+} from "firebase/auth";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,18 +39,57 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 // const user = 2;
 
-const FirebaseContext = createContext(null);
+export const FirebaseContext = createContext(null);
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const provider = new GoogleAuthProvider();
+  const auth = getAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+
+    // Clean up subscription on unmount
+    return () => unsubscribe();
+  }, [auth]);
+
+  function handleSignIn() {
+    if (!user) {
+      // If user is not signed in, sign them in
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          // Handle successful sign-in
+          console.log(result.user);
+        })
+        .catch((error) => {
+          // Handle sign-in errors
+          console.error(error);
+        });
+    } else {
+      // If user is already signed in, sign them out
+      signOut(auth)
+        .then(() => {
+          // Handle successful sign-out
+          console.log("User signed out successfully");
+        })
+        .catch((error) => {
+          // Handle sign-out errors
+          console.error(error);
+        });
+    }
+  }
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <FirebaseContext.Provider value={app}>
-          <Navbar />
+          <Navbar user={user} handleSignIn={handleSignIn} />
           <div className="max-w-7xl m-auto px-4">{children}</div>
         </FirebaseContext.Provider>
       </body>
