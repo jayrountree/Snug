@@ -11,6 +11,7 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
 } from "firebase/auth";
+import { ChakraProvider } from '@chakra-ui/react'
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -96,12 +97,15 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <FirebaseContext.Provider value={app}>
-          <Navbar user={user} handleSignIn={handleSignIn} />
-          {user && <div className="max-w-7xl m-auto px-4">{children}</div>}
-        </FirebaseContext.Provider>
-      </body>
+      <ChakraProvider>
+        <body className={inter.className}>
+          <FirebaseContext.Provider value={app}>
+            <Navbar user={user} handleSignIn={handleSignIn} />
+            {user && <div className="max-w-7xl m-auto px-4">{children}</div>}
+          </FirebaseContext.Provider>
+        </body>
+      </ChakraProvider>
+
     </html>
   );
 }
