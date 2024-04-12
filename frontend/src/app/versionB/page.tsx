@@ -13,11 +13,13 @@ const Home = () => {
       const newData = querySnapshot.docs.map(
         (doc) => doc.data() as PostInterface
       );
-      setData((prevData) => [...prevData, ...newData]);
+      setData(newData);
     };
 
     fetchData();
   }, []);
+
+  console.log(data);
 
   return (
     <div className="flex flex-wrap gap-2 justify-center items-center">
