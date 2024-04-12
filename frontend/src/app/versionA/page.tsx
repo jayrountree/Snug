@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { getFirestore, query, where } from "firebase/firestore";
 import { collection, getDocs } from "firebase/firestore";
+import Searchbar from "../components/Searchbar";
+
 
 export interface PostInterface {
   imageName: string;
@@ -44,15 +46,7 @@ const Home = () => {
 
   return (
     <div className="flex flex-col gap-2 justify-center items-center">
-      <div>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <button onClick={() => {
-          setSearchWords(search.split(' '));
-        }}>Search</button>
-      </div>
+      <Searchbar search={search} setSearch={setSearch} setSearchWords={setSearchWords}></Searchbar>
       
       {data.map((i, index) => (
         <img
