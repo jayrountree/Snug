@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
-import { initializeApp, FirebaseApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import { createContext, useEffect, useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -11,7 +11,6 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
 } from "firebase/auth";
-
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,7 +36,21 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// const user = 2;
+
+// function initData() {
+//   jsonData.posts.map((i, index) => {
+//     addDoc(collection(db, "all-posts"), {
+//       imageName: i.imageName,
+//       image: i.image,
+//       themeTags: i.themeTags,
+//       itemTags: i.itemTags,
+//       likes: i.likes,
+//       user: i.user,
+//       timePosted: i.timePosted,
+//     });
+//   });
+//   console.log("done");
+// }
 
 export const FirebaseContext = createContext(null);
 

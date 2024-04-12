@@ -1,15 +1,33 @@
-import React from "react";
-import { getFirestore } from "firebase/firestore";
-import jsonData from "../assets/posts.json";
+"use client";
+import React, { useEffect, useState } from "react";
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { PostInterface } from "../versionA/page";
 
 const Home = () => {
+  const db = getFirestore();
+  const [data, setData] = useState<PostInterface[]>([]);
 
-  // const db = getFirestore();
+  useEffect(() => {
+    const fetchData = async () => {
+      const querySnapshot = await getDocs(collection(db, "all-posts"));
+      const newData = querySnapshot.docs.map(
+        (doc) => doc.data() as PostInterface
+      );
+      setData((prevData) => [...prevData, ...newData]);
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="flex flex-wrap gap-2 justify-center items-center">
-      {jsonData.posts.map((i) => (
-        <img className=" rounded-md max-w-xs" src={i.image} alt="" srcset="" />
+      {data.map((i, index) => (
+        <img
+          key={index}
+          className=" rounded-md max-w-xs"
+          src={i.image as string}
+          alt={i.imageName}
+        />
       ))}
     </div>
   );
