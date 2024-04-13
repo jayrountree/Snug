@@ -5,6 +5,9 @@ import { collection, getDocs } from "firebase/firestore";
 import Searchbar from "../components/Searchbar";
 import LikeButton from "../components/LikeButton";
 import StarButton from "../components/StarButton";
+import ThemeTag from "../components/ThemeTag";
+
+const hsl = require('hsl-to-hex');
 
 export interface PostInterface {
   imageName: string;
@@ -22,12 +25,19 @@ const Home = () => {
 
   const [searchWords, setSearchWords] = useState([""]);
   const [search, setSearch] = useState("");
+  const [themeColors, setThemeColors] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
       // Fetch all posts initially
       const querySnapshot = await getDocs(collection(db, "all-posts"));
       const allPosts = querySnapshot.docs.map((doc) => doc.data() as PostInterface);
+
+      const allStyles = allPosts.flatMap(post => post.themeTags)
+      const uniqueStyles = Array.from(new Set(allStyles));
+      const colors = generateColors(uniqueStyles);
+      console.log('colors', colors);
+      setThemeColors(colors);
 
       if (!search.trim()) {
         setData(allPosts);
@@ -43,6 +53,23 @@ const Home = () => {
     fetchData();
   }, [db, searchWords]);
 
+  const randomInt = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  const generateColors = (styles: String[]) => {
+
+    let out = {}
+    for(let hStep = 0; hStep < styles.length; hStep++){
+      const h = Math.floor(hStep * 360 / styles.length);
+      const s = randomInt(42, 98);
+      const l = randomInt(85, 90);
+      
+      out[styles[hStep]] = hsl(h, s, l);
+    }
+    return out;
+  }
+
   console.log(data);
 
   return (
@@ -50,10 +77,9 @@ const Home = () => {
       <Searchbar search={search} setSearch={setSearch} setSearchWords={setSearchWords}></Searchbar>
 
       {data.map((i, index) => (
-        <div className="bg-white p-4 rounded-md post">
+        <div className="bg-white p-4 rounded-md post" key={index}>
           <div className="my-2 username">{"Posted by: " + i.user}</div>
           <img
-            key={index}
             className=" rounded-md max-w-xs"
             src={i.image as string}
             alt={i.imageName}
@@ -67,8 +93,17 @@ const Home = () => {
               <StarButton />
             </div>
           </div>
-          <div className="style-tags max-w-xs">{"Styles: " + i.themeTags.join(", ")}</div>
-          <div className="item-tags max-w-xs">{"Items: " + i.itemTags.join(", ")}</div>
+          <div className="style-tags max-w-xs">
+            Styles: 
+            {
+              i.themeTags.map(tag => 
+              <ThemeTag
+                key={i.themeTags.indexOf(tag)}
+                color={themeColors[tag] || '#ffffff'}
+                tag={tag}
+              />)
+            }
+          </div>
         </div>
       ))
       }
