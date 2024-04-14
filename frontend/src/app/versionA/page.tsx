@@ -94,7 +94,6 @@ const Home = () => {
             </div>
           </div>
           <div className="style-tags max-w-xs">
-            Styles: 
             {
               i.themeTags.map(tag => 
               <ThemeTag
