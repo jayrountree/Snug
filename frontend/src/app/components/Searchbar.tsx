@@ -18,6 +18,7 @@ import {
   Select,
 } from "chakra-react-select";
 import { groupedOptions } from "../assets/data";
+import { PiXCircleThin } from "react-icons/pi";
 
 
 const Searchbar = ({ setSearchWords }) => {
@@ -31,8 +32,8 @@ const Searchbar = ({ setSearchWords }) => {
   }
 
   return (
-    <div>
-      <Container mb={20}>
+    <div style={{width: '450px'}}>
+      <Container>
         <FormControl p={4}>
           <Select
             isMulti

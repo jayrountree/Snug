@@ -71,9 +71,13 @@ const Home = () => {
   // console.log(data);
 
   return (
-    <div className="flex flex-col gap-2 justify-center items-center">
-      <Searchbar setSearchWords={setSearchWords}></Searchbar>
-
+    <div>
+      <div className="flex flex-col gap-2 justify-center items-center">
+        <Searchbar setSearchWords={setSearchWords}></Searchbar>
+      </div>
+      <div className="flex flex-col gap-2 justify-center items-center">
+      
+    
       {data.map((i, index) => (
         <div className="bg-white p-4 rounded-md post" key={index}>
           <div className="my-2 username">{"Posted by: " + i.user}</div>
@@ -105,6 +109,8 @@ const Home = () => {
       ))
       }
     </div>
+    </div>
+    
   );
 };
 
