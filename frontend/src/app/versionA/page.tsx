@@ -23,8 +23,7 @@ const Home = () => {
   const db = getFirestore();
   const [data, setData] = useState<PostInterface[]>([]);
 
-  const [searchWords, setSearchWords] = useState([""]);
-  const [search, setSearch] = useState("");
+  const [searchWords, setSearchWords] = useState([]);
   const [themeColors, setThemeColors] = useState({});
 
   useEffect(() => {
@@ -36,14 +35,13 @@ const Home = () => {
       const allStyles = allPosts.flatMap(post => post.themeTags)
       const uniqueStyles = Array.from(new Set(allStyles));
       const colors = generateColors(uniqueStyles);
-      console.log('colors', colors);
+      // console.log('colors', colors);
       setThemeColors(colors);
-
-      if (!search.trim()) {
+      if (searchWords.length == 0) {
         setData(allPosts);
       } else {
         // Filter posts based on tags
-        const q = query(collection(db, "all-posts"), where('itemTags', 'array-contains-any', search.trim().split(' ')));
+        const q = query(collection(db, "all-posts"), where('itemTags', 'array-contains-any', searchWords));
         const filteredQuerySnapshot = await getDocs(q);
         const filteredPosts = filteredQuerySnapshot.docs.map((doc) => doc.data() as PostInterface);
         setData(filteredPosts);
@@ -70,11 +68,11 @@ const Home = () => {
     return out;
   }
 
-  console.log(data);
+  // console.log(data);
 
   return (
     <div className="flex flex-col gap-2 justify-center items-center">
-      <Searchbar search={search} setSearch={setSearch} setSearchWords={setSearchWords}></Searchbar>
+      <Searchbar setSearchWords={setSearchWords}></Searchbar>
 
       {data.map((i, index) => (
         <div className="bg-white p-4 rounded-md post" key={index}>

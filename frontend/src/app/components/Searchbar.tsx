@@ -6,39 +6,43 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightAddon,
-  InputLeftAddon
+  InputLeftAddon,
+
+  Container, FormControl, FormLabel 
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
+import {
+  AsyncCreatableSelect,
+  AsyncSelect,
+  CreatableSelect,
+  Select,
+} from "chakra-react-select";
+import { groupedOptions } from "../assets/data";
 
 
-const Searchbar = ({ search, setSearch, setSearchWords }) => {
+const Searchbar = ({ setSearchWords }) => {
+
+  const handleSearch = (opt) => {
+    let searchWords: String[] = [];
+    opt.forEach((tag: Object) => {
+      searchWords.push(tag.label);
+    });
+    setSearchWords(searchWords);
+  }
+
   return (
     <div>
-      <InputGroup size="sm">
-        <InputLeftElement 
-        pointerEvents="none" children={<Search2Icon color="gray.600" />}>
-        </InputLeftElement>
-        <Input
-          borderRadius={10}
-          type="text"
-          placeholder="Search" border="1px solid #949494"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter")
-              setSearchWords(search.split(' '));
-            }}>
-        </Input>
-        {/* <InputRightAddon
-          p={0}
-          border="none"
-        >
-          <Button size="sm" borderLeftRadius={0} borderRightRadius={10} border="1px solid #949494" 
-          onClick={() => {setSearchWords(search.split(' '))}}>
-            Search
-          </Button>
-        </InputRightAddon> */}
-      </InputGroup>
+      <Container mb={20}>
+        <FormControl p={4}>
+          <Select
+            isMulti
+            onChange={opt => handleSearch(opt)}
+            options={groupedOptions}
+            placeholder="Search"
+            closeMenuOnSelect={false}
+          />
+        </FormControl>
+      </Container>
     </div>
   );
 };

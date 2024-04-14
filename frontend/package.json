@@ -14,6 +14,7 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@firebase/auth": "^1.7.1",
+    "chakra-react-select": "^4.7.6",
     "firebase": "^10.11.0",
     "framer-motion": "^11.0.28",
     "hsl-to-hex": "^1.0.0",
