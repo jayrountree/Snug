@@ -1,7 +1,10 @@
-const ThemeTag = ({color, tag}) => {
-
+import { Tag } from '@chakra-ui/tag'
+import { styles } from '../assets/data'
+const ThemeTag = ({tag}) => {
     return (
-        <div className="inline-block mx-1 rounded-md p-1 m-2" style={{ backgroundColor: color }}>{tag}</div>
+        <Tag p="2" m="1" size="s" colorScheme={
+            styles.find((obj) => obj.label === tag)?.colorScheme
+        }>{tag}</Tag>
     )
 }
 

@@ -24,7 +24,6 @@ const Home = () => {
   const [data, setData] = useState<PostInterface[]>([]);
 
   const [searchWords, setSearchWords] = useState([]);
-  const [themeColors, setThemeColors] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,11 +31,6 @@ const Home = () => {
       const querySnapshot = await getDocs(collection(db, "all-posts"));
       const allPosts = querySnapshot.docs.map((doc) => doc.data() as PostInterface);
 
-      const allStyles = allPosts.flatMap(post => post.themeTags)
-      const uniqueStyles = Array.from(new Set(allStyles));
-      const colors = generateColors(uniqueStyles);
-      // console.log('colors', colors);
-      setThemeColors(colors);
       if (searchWords.length == 0) {
         setData(allPosts);
       } else {
@@ -50,23 +44,6 @@ const Home = () => {
 
     fetchData();
   }, [db, searchWords]);
-
-  const randomInt = (min, max) => {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-
-  const generateColors = (styles: String[]) => {
-
-    let out = {}
-    for(let hStep = 0; hStep < styles.length; hStep++){
-      const h = Math.floor(hStep * 360 / styles.length);
-      const s = randomInt(42, 98);
-      const l = randomInt(85, 90);
-      
-      out[styles[hStep]] = hsl(h, s, l);
-    }
-    return out;
-  }
 
   // console.log(data);
 
@@ -86,7 +63,7 @@ const Home = () => {
             src={i.image as string}
             alt={i.imageName}
           />
-          <div className="flex flex-row justfy-center justify-between buttons my-4">
+          <div className="flex flex-row justfy-center justify-between my-4 buttons">
             <div className="likes">
               <LikeButton />
               <div className="font-bold like-count">{i.likes + " likes"}</div>
@@ -95,12 +72,11 @@ const Home = () => {
               <StarButton />
             </div>
           </div>
-          <div className="style-tags max-w-xs">
+          <div className="max-w-xs style-tags">
             {
               i.themeTags.map(tag => 
               <ThemeTag
                 key={i.themeTags.indexOf(tag)}
-                color={themeColors[tag] || '#ffffff'}
                 tag={tag}
               />)
             }
