@@ -3,11 +3,18 @@ import React, { useEffect, useState } from "react";
 import { getFirestore, query, where } from "firebase/firestore";
 import { collection, getDocs } from "firebase/firestore";
 import Searchbar from "../components/Searchbar";
-import LikeButton from "../components/LikeButton";
 import StarButton from "../components/StarButton";
 import ThemeTag from "../components/ThemeTag";
+import weaviate from "weaviate-ts-client";
+import { StarIcon } from "@chakra-ui/icons";
+import { Button } from "@chakra-ui/react";
 
-const hsl = require('hsl-to-hex');
+const hsl = require("hsl-to-hex");
+
+const client = weaviate.client({
+  scheme: "http",
+  host: "localhost:8080",
+});
 
 export interface PostInterface {
   imageName: string;
@@ -20,73 +27,122 @@ export interface PostInterface {
 }
 
 const Home = () => {
-  const db = getFirestore();
-  const [data, setData] = useState<PostInterface[]>([]);
+  // const db = getFirestore();
+  const [data, setData] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [showSelected, setShowSelected] = useState(false);
 
-  const [searchWords, setSearchWords] = useState([]);
+  const [tags, setTags] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch all posts initially
-      const querySnapshot = await getDocs(collection(db, "all-posts"));
-      const allPosts = querySnapshot.docs.map((doc) => doc.data() as PostInterface);
-
-      if (searchWords.length == 0) {
-        setData(allPosts);
-      } else {
-        // Filter posts based on tags
-        const q = query(collection(db, "all-posts"), where('itemTags', 'array-contains-any', searchWords));
-        const filteredQuerySnapshot = await getDocs(q);
-        const filteredPosts = filteredQuerySnapshot.docs.map((doc) => doc.data() as PostInterface);
-        setData(filteredPosts);
-      }
+      setData(await readImages());
     };
 
     fetchData();
-  }, [db, searchWords]);
+  }, []);
 
-  // console.log(data);
+  async function readImages() {
+    const query = await client.graphql
+      .get()
+      .withClassName("Image")
+      .withFields("image name tags")
+      .do();
+    return query.data.Get.Image;
+  }
+
+  async function queryTags(tags) {
+    const res = await client.graphql
+      .get()
+      .withClassName("Image")
+      .withFields("image name tags")
+      .withWhere({
+        path: ["tags"],
+        operator: "ContainsAll",
+        valueTextArray: tags,
+      })
+      .do();
+
+    // console.log(res.data.Get);
+    setData(res.data.Get.Image);
+    // res.data.Get.Image((i) => console.log(i.name, i.tags));
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setData(await readImages());
+    };
+
+    if (tags.length != 0) {
+      // Filter posts based on tags
+      queryTags(tags);
+    } else {
+      fetchData();
+    }
+  }, [tags]);
+
+  // let u: string[] = [];
+  // data.map((i) => {
+  //   if (i.tags) {
+  //     i.tags.map((j) => {
+  //       if (!u.includes(j)) {
+  //         u.push(j);
+  //       }
+  //     });
+  //   }
+  // });
+  // console.log(u);
+
+  function render() {
+    let dispData = data;
+    if (showSelected) {
+      dispData = data.filter((item) => selected.includes(item.name));
+    }
+    return dispData.map((i, index) => (
+      <div className="flex flex-col justify-center items-center " key={index}>
+        <div className=" flex justify-center">
+          <p>{"Posted by: " + "@akshath.taduri"}</p>
+        </div>
+        <img
+          className=" rounded-md max-w-xs"
+          src={`data:image/png;base64,${i.image}`}
+          alt={i.name}
+        />
+        <div className="max-w-xs style-tags flex flex-wrap items-center justify-center">
+          <button className=" flex justify-center p-4">
+            {selected.includes(i.name) ? (
+              <StarIcon
+                color={"yellow.500"}
+                onClick={() =>
+                  setSelected(selected.filter((item) => i.name != item))
+                }
+              />
+            ) : (
+              <StarIcon onClick={() => setSelected([...selected, i.name])} />
+            )}
+          </button>
+          {i.tags &&
+            i.tags.map((tag, index) => <ThemeTag key={index} tag={tag} />)}
+        </div>
+      </div>
+    ));
+  }
 
   return (
     <div>
-      <div className="flex flex-col gap-2 justify-center items-center">
-        <Searchbar setSearchWords={setSearchWords}></Searchbar>
+      <div className="flex py-2 justify-center items-center">
+        <Searchbar setSearchWords={setTags}></Searchbar>
+        {/* <button onClick={() => queryTag("plants")}>Click</button> */}
+
+        <Button onClick={() => setShowSelected(!showSelected)}>
+          {showSelected ? "Show All" : "Show Favorites"}
+        </Button>
       </div>
-      <div className="flex flex-col gap-2 justify-center items-center">
-      
-    
-      {data.map((i, index) => (
-        <div className="bg-white p-4 rounded-md post" key={index}>
-          <div className="my-2 username">{"Posted by: " + i.user}</div>
-          <img
-            className=" rounded-md max-w-xs"
-            src={i.image as string}
-            alt={i.imageName}
-          />
-          <div className="flex flex-row justfy-center justify-between my-4 buttons">
-            <div className="likes">
-              <LikeButton />
-              <div className="font-bold like-count">{i.likes + " likes"}</div>
-            </div>
-            <div className="star">
-              <StarButton />
-            </div>
-          </div>
-          <div className="max-w-xs style-tags">
-            {
-              i.themeTags.map(tag => 
-              <ThemeTag
-                key={i.themeTags.indexOf(tag)}
-                tag={tag}
-              />)
-            }
-          </div>
-        </div>
-      ))
-      }
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 justify-center items-center">
+        {render()}
+      </div>
     </div>
-    </div>
-    
   );
 };
 

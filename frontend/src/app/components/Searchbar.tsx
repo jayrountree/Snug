@@ -7,8 +7,9 @@ import {
   InputLeftElement,
   InputRightAddon,
   InputLeftAddon,
-
-  Container, FormControl, FormLabel 
+  Container,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
 import {
@@ -20,24 +21,26 @@ import {
 import { groupedOptions } from "../assets/data";
 import { PiXCircleThin } from "react-icons/pi";
 
-
 const Searchbar = ({ setSearchWords }) => {
+  // console.log("tewstrs");
 
   const handleSearch = (opt) => {
+    // console.log(opt);
+
     let searchWords: String[] = [];
     opt.forEach((tag: Object) => {
       searchWords.push(tag.label);
     });
     setSearchWords(searchWords);
-  }
+  };
 
   return (
-    <div style={{width: '450px'}}>
+    <div style={{ width: "450px" }}>
       <Container>
         <FormControl p={4}>
           <Select
             isMulti
-            onChange={opt => handleSearch(opt)}
+            onChange={(opt) => handleSearch(opt)}
             options={groupedOptions}
             placeholder="Search"
             closeMenuOnSelect={false}
