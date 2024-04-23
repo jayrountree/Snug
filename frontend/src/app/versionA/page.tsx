@@ -104,6 +104,7 @@ const Home = () => {
           <p>{"Posted by: " + "@akshath.taduri"}</p>
         </div>
         <img
+          onClick={() => console.log(i.image)}
           className=" rounded-md max-w-xs"
           src={`data:image/png;base64,${i.image}`}
           alt={i.name}

@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import { initializeApp } from "firebase/app";
 import { FavoritedImagesProvider } from "./FavoritedImagesContext";
 import { createContext, useEffect, useState } from "react";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, signOut, User } from "firebase/auth";
 import {
   signInWithPopup,
   GoogleAuthProvider,
@@ -51,7 +51,7 @@ const app = initializeApp(firebaseConfig);
 //   console.log("done");
 // }
 
-export const FirebaseContext = createContext(null);
+const FirebaseContext = createContext(null);
 
 export default function RootLayout({
   children,
@@ -60,7 +60,7 @@ export default function RootLayout({
 }>) {
   const provider = new GoogleAuthProvider();
   const auth = getAuth();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {

@@ -35,6 +35,8 @@ const Home = () => {
 
   const [tags, setTags] = useState([]);
 
+  const users = ["akshath.taduri", "jay.rountree", "shivab", "luke.knight"];
+
   useEffect(() => {
     const fetchData = async () => {
       setData(await readImages());
@@ -69,11 +71,27 @@ const Home = () => {
     // res.data.Get.Image((i) => console.log(i.name, i.tags));
   }
 
-  async function queryImage1(base64: string, tags: string[]) {
+  async function queryImage1(base64: string = "") {
     const resImage = await client.graphql
       .get()
       .withClassName("Image")
-      .withFields("image name _additional {id certainty distance}")
+      .withFields("image tags name _additional {id certainty distance}")
+      .withNearImage({ image: base64 })
+
+      .do();
+
+    setData(
+      resImage.data.Get.Image.filter((i) => {
+        return i.name != queryImage[0];
+      })
+    );
+  }
+
+  async function queryImage2(base64: string = "", tags: string[] = []) {
+    const resImage = await client.graphql
+      .get()
+      .withClassName("Image")
+      .withFields("image tags name _additional {id certainty distance}")
       .withNearImage({ image: base64 })
       .withWhere({
         path: ["tags"],
@@ -94,79 +112,115 @@ const Home = () => {
       setData(await readImages());
     };
     if (tags.length != 0 && queryImage[0] != "") {
+      queryImage2(queryImage[1], tags);
     } else if (tags.length != 0) {
       // Filter posts based on tags
       queryTags(tags);
     } else if (queryImage[0] != "") {
-      // queryImage1(queryImage[1]);
+      queryImage1(queryImage[1]);
     } else {
       fetchData();
     }
   }, [tags, queryImage]);
-
-  // let u: string[] = [];
-  // data.map((i) => {
-  //   if (i.tags) {
-  //     i.tags.map((j) => {
-  //       if (!u.includes(j)) {
-  //         u.push(j);
-  //       }
-  //     });
-  //   }
-  // });
-  // console.log(u);
 
   function render() {
     let dispData = data;
     if (showSelected) {
       dispData = data.filter((item) => selected.includes(item.name));
     }
-    return dispData.map((i, index) => (
-      <div className="flex flex-col justify-center items-center " key={index}>
-        <div className=" flex justify-center">
-          <p>{"Posted by: " + "@akshath.taduri"}</p>
-        </div>
-        <img
-          className=" rounded-md max-w-xs"
-          src={`data:image/png;base64,${i.image}`}
-          alt={i.name}
-        />
-        <div className="max-w-xs style-tags flex flex-wrap items-center justify-center">
-          <button className=" flex justify-center p-4">
-            {selected.includes(i.name) ? (
-              <StarIcon
-                color={"yellow.500"}
-                onClick={() =>
-                  setSelected(selected.filter((item) => i.name != item))
-                }
-              />
-            ) : (
-              <StarIcon onClick={() => setSelected([...selected, i.name])} />
-            )}
-          </button>
-          {i.tags &&
-            i.tags.map((tag, index) => <ThemeTag key={index} tag={tag} />)}
-        </div>
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 justify-center items-center">
+        {dispData.map((i, index) => (
+          <div
+            className="relative flex flex-col justify-end items-end "
+            key={index}
+          >
+            <img
+              className="rounded-lg object-cover h-60 w-60 hover:cursor-pointer"
+              src={`data:image/png;base64,${i.image}`}
+              alt={i.name}
+              onClick={() => {
+                window.scrollTo({
+                  top: 0,
+                  behavior: "smooth", // Optional, adds smooth scrolling effect
+                });
+                setQueryImage([i.name, i.image]);
+              }}
+            />
+            <div className="max-w-xs style-tags flex flex-col  items-end justify-center">
+              <div className="flex justify-center items-center gap-4">
+                <p className=" text-brown">
+                  {i._additional &&
+                    (i._additional.certainty * 100).toFixed(2) + "%"}
+                </p>
+                <button className=" flex justify-between w-full p-4">
+                  {selected.includes(i.name) ? (
+                    <StarIcon
+                      color={"yellow.500"}
+                      onClick={() =>
+                        setSelected(selected.filter((item) => i.name != item))
+                      }
+                    />
+                  ) : (
+                    <StarIcon
+                      onClick={() => setSelected([...selected, i.name])}
+                    />
+                  )}
+                </button>
+              </div>
+              <div className=" flex justify-end items-center flex-wrap">
+                {i.tags &&
+                  i.tags.map((tag, index) => (
+                    <ThemeTag key={index} tag={tag} />
+                  ))}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-    ));
+    );
   }
 
   return (
     <div>
-      <div className="flex py-2 justify-center items-center">
-        <Searchbar setSearchWords={setTags}></Searchbar>
-        {/* <button onClick={() => queryTag("plants")}>Click</button> */}
+      <div className="flex py-2 justify-center items-center border-b-2  border-b-beige">
+        <div className="flex w-full justify-center ">
+          {queryImage[1] != "" && (
+            <img
+              width={200}
+              className=" h-32 w-40 rounded-md max-w-xs"
+              onClick={() => {
+                setQueryImage(["", ""]);
+              }}
+              src={`data:image/png;base64,${queryImage[1]}`}
+              alt=""
+            />
+          )}
+        </div>
+        <div className="flex justify-center items-center">
+          <Searchbar setSearchWords={setTags}></Searchbar>
 
-        <Button onClick={() => setShowSelected(!showSelected)}>
-          {showSelected ? "Show All" : "Show Favorites"}
-        </Button>
+          <Button onClick={() => setShowSelected(!showSelected)}>
+            {showSelected ? "Show All" : "Show Favorites"}
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 justify-center items-center">
-        {render()}
-      </div>
+      <div className=" py-4">{render()}</div>
     </div>
   );
 };
 
 export default Home;
+
+// let u: string[] = [];
+// data.map((i) => {
+//   if (i.tags) {
+//     i.tags.map((j) => {
+//       if (!u.includes(j)) {
+//         u.push(j);
+//       }
+//     });
+//   }
+// });
+// console.log(u);

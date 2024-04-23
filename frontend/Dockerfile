@@ -5,19 +5,24 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Copy package.json and package-lock.json (if available)
-COPY package*.json ./
+COPY package.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# # Copy the rest of the application code
 COPY . .
+
 
 # Expose the port that the Next.js application runs on (if needed)
 EXPOSE 3000
 
+RUN npm run build
+
+COPY ./ ./.next
+
 # Run the development server using `npm run dev`
-CMD ["npm", "run", "dev"]
+CMD ["yarn","dev"]
 
 #docker build -t frontend .
 #docker run -p 3000:3000 frontend

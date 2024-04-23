@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/components/PostGroup.jsx", "src/app/components/Searchbar.jsx", "src/app/components/StarButton.jsx", "src/app/components/ThemeTag.jsx", "src/app/components/UserInfo.jsx"],
   "exclude": ["node_modules"]
 }

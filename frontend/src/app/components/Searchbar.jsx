@@ -27,8 +27,8 @@ const Searchbar = ({ setSearchWords }) => {
   const handleSearch = (opt) => {
     // console.log(opt);
 
-    let searchWords: String[] = [];
-    opt.forEach((tag: Object) => {
+    let searchWords = [];
+    opt.forEach((tag) => {
       searchWords.push(tag.label);
     });
     setSearchWords(searchWords);
