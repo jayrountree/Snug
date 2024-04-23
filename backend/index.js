@@ -141,7 +141,7 @@ const tags = {
 
 // getSchema();
 // schemaConfigUpdate();
-queryTag(["plants", "kirby"]);
+// queryTag(["plants", "kirby"]);
 // addImages();
 // readImages();
 // deleteImages();

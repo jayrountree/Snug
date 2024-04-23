@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { initializeApp } from "firebase/app";
+import { FavoritedImagesProvider } from "./FavoritedImagesContext";
 import { createContext, useEffect, useState } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import {
@@ -100,12 +101,14 @@ export default function RootLayout({
     <html lang="en">
       <FirebaseContext.Provider value={app}>
         <body className={inter.className}>
+          <FavoritedImagesProvider>
           <ChakraProvider>
             <Navbar user={user} handleSignIn={handleSignIn} />
             {user && (
               <div className="max-w-7xl m-auto px-4 py-12">{children}</div>
             )}
           </ChakraProvider>
+          </FavoritedImagesProvider>
         </body>
       </FirebaseContext.Provider>
     </html>

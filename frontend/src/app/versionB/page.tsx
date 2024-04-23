@@ -1,22 +1,29 @@
-"use client";
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
-import { PostInterface } from "../versionA/page";
+import { getFirestore } from "firebase/firestore";
 import weaviate from "weaviate-ts-client";
-import { graphql } from "graphql";
 import { StarIcon } from "@chakra-ui/icons";
 import { Button } from "@chakra-ui/react";
+import { useFavoritedImages } from "../FavoritedImagesContext";
 
-const Home = () => {
+interface Image {
+  name: string;
+  image: string;
+  _additional?: {
+    certainty: number;
+  };
+}
+
+const Home: React.FC = () => {
   const db = getFirestore();
-  const [data, setData] = useState([]);
-  const [queryImage, setQueryImage] = useState(["", ""]); //[name, image]
+  const [data, setData] = useState<Image[]>([]);
+  const [queryImage, setQueryImage] = useState<[string, string]>(["", ""]); //[name, image]
   const client = weaviate.client({
     scheme: "http",
     host: "localhost:8080",
   });
-  const [showSelected, setShowSelected] = useState(false);
-  const [selected, setSelected] = useState([]);
+  const [showSelected, setShowSelected] = useState<boolean>(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const { favoritedImages, addFavoritedImage, removeFavoritedImage } = useFavoritedImages();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,22 +38,20 @@ const Home = () => {
       setData(await readImages());
     };
 
-    if (queryImage[0] != "") {
+    if (queryImage[0] !== "") {
       queryImage1(queryImage[1]);
     } else {
       fetchData();
     }
   }, [queryImage]);
 
-  async function readImages() {
+  async function readImages(): Promise<Image[]> {
     const query = await client.graphql
       .get()
       .withClassName("Image")
       .withFields("image name ")
       .do();
-    return query.data.Get.Image.map((d) => {
-      return d;
-    });
+    return query.data.Get.Image.map((d: any) => d);
   }
 
   async function queryImage1(base64: string) {
@@ -55,21 +60,12 @@ const Home = () => {
       .withClassName("Image")
       .withFields("image name _additional {id certainty distance}")
       .withNearImage({ image: base64 })
-      .withWhere({
-        path: ["tags"],
-        operator: "ContainsAll",
-        valueTextArray: ["gaming"],
-      })
       .do();
 
     setData(
-      resImage.data.Get.Image.filter((i) => {
-        return i.name != queryImage[0];
-      })
+      resImage.data.Get.Image.filter((i: any) => i.name !== queryImage[0])
     );
   }
-
-  // console.log(data);
 
   function renderImages() {
     let dispData = data;
@@ -81,27 +77,24 @@ const Home = () => {
         {dispData.map((i, index) => {
           return (
             <div
-              className="relative flex flex-col justify-end items-end "
+              className="relative flex flex-col justify-end items-end"
               key={index}
             >
-              <div className="flex justify-between w-full ">
-                <p className=" text-brown">
+              <div className="flex justify-between w-full">
+                <p className="text-brown">
                   {i._additional && i._additional.certainty}
                 </p>
 
-                <button>
-                  {selected.includes(i.name) ? (
-                    <StarIcon
-                      color={"yellow.500"}
-                      onClick={() =>
-                        setSelected(selected.filter((item) => i.name != item))
-                      }
-                    />
-                  ) : (
-                    <StarIcon
-                      onClick={() => setSelected([...selected, i.name])}
-                    />
-                  )}
+                <button onClick={() => {
+                  if (selected.includes(i.name)) {
+                    setSelected(selected.filter((item) => i.name !== item));
+                    removeFavoritedImage(i.name);
+                  } else {
+                    setSelected([...selected, i.name]);
+                    addFavoritedImage(i);
+                  }
+                }}>
+                  <StarIcon color={selected.includes(i.name) ? "yellow.500" : undefined} />
                 </button>
               </div>
 
@@ -109,13 +102,14 @@ const Home = () => {
                 onClick={() => {
                   window.scrollTo({
                     top: 0,
-                    behavior: "smooth", // Optional, adds smooth scrolling effect
+                    behavior: "smooth",
                   });
 
                   setQueryImage([i.name, i.image]);
                 }}
                 className="rounded-lg object-cover h-60 w-60 hover:cursor-pointer"
                 src={`data:image/png;base64,${i.image}`}
+                alt=""
               />
             </div>
           );
@@ -129,7 +123,7 @@ const Home = () => {
       <div className="flex w-full justify-center py-4 border-b-2  border-b-beige">
         <img
           width={200}
-          className=" rounded-md max-w-xs"
+          className="rounded-md max-w-xs"
           onClick={() => setQueryImage(["", ""])}
           src={`data:image/png;base64,${queryImage[1]}`}
           alt=""
@@ -142,40 +136,6 @@ const Home = () => {
           </Button>
         </div>
         <div className="">
-          {/* {data.map((i, index) => {
-            return (
-              <div
-                className="relative flex flex-col justify-end items-end "
-                key={index}
-              >
-                <button>
-                  {selected.includes(i.name) ? (
-                    <StarIcon
-                      color={"yellow.500"}
-                      onClick={() =>
-                        setSelected(selected.filter((item) => i.name != item))
-                      }
-                    />
-                  ) : (
-                    <StarIcon
-                      onClick={() => setSelected([...selected, i.name])}
-                    />
-                  )}
-                </button>
-                <img
-                  onClick={() => {
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth", // Optional, adds smooth scrolling effect
-                    });
-                    setQueryImage([i.name, i.image]);
-                  }}
-                  className="rounded-lg object-cover h-60 w-60 hover:cursor-pointer"
-                  src={`data:image/png;base64,${i.image}`}
-                />
-              </div>
-            );
-          })} */}
           {renderImages()}
         </div>
       </div>
